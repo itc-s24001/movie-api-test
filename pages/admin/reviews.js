@@ -14,7 +14,7 @@ export default function AdminReviews() {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (!currentUser) {
-                router.push('/login')
+                router.push('/')
                 return
             }
 

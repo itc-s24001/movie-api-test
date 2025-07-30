@@ -24,7 +24,7 @@ export default function SettingsPage() {
                 setUser(currentUser)
                 setEmail(currentUser.email)
             } else {
-                router.push('/login')
+                router.push('/')
             }
         })
         return () => unsubscribe()

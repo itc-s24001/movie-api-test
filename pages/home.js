@@ -194,25 +194,36 @@ export default function Home() {
                 </>
             )}
             {/*{弾幕コメントはジャンル未選択のみ表示}*/}
-            {!genreId && comments.map((comment, index) => (
-                <Link href={`/movie/${comment.movieId}`} key={`${comment.id}-${index}`}>
-                    <div
-                        className="absolute whitespace-nowrap text-lg font-bold text-white cursor-pointer"
-                        style={{
-                            top: `${comment.top}px`,
-                            transform: 'translateX(100vw)',
-                            animationDelay: `${comment.delay}s`,
-                            animationName: 'slide',
-                            animationDuration: '15s',
-                            animationTimingFunction: 'linear',
-                            animationIterationCount: 'infinite',
-                            willChange: 'transform',
-                        }}
-                    >
-                        {'⭐'.repeat(comment.rating)} {comment.text}
-                    </div>
-                </Link>
-            ))}
+            {!genreId && (
+                <div
+                    className="fixed left-0 right-0 z-10 pointer-events-none"
+                    style={{
+                        top: '80px',
+                        bottom: '50px',
+                        overflow: 'hidden',
+                    }}
+                >
+                    {comments.map((comment, index) => (
+                        <Link href={`/movie/${comment.movieId}`} key={`${comment.id}-${index}`} passHref legacyBehavior>
+                            <a
+                                className="absolute whitespace-nowrap text-lg font-bold text-white pointer-events-auto hover:underline"
+                                style={{
+                                    top: `${comment.top}px`,
+                                    transform: 'translateX(100vw)',
+                                    animationDelay: `${comment.delay}s`,
+                                    animationName: 'slide',
+                                    animationDuration: '15s',
+                                    animationTimingFunction: 'linear',
+                                    animationIterationCount: 'infinite',
+                                    willChange: 'transform',
+                                }}
+                            >
+                                {'⭐'.repeat(comment.rating)} {comment.text}
+                            </a>
+                        </Link>
+                    ))}
+                </div>
+            )}
 
             <style jsx>{`
                 @keyframes slide {

@@ -8,7 +8,7 @@ import { signOut } from 'firebase/auth'
 
 export default function MyApp({ Component, pageProps }) {
     const router = useRouter()
-    const isLoginPage = router.pathname === '/login'
+    const isLoginPage = router.pathname === '/'
 
     useEffect(() => {
         if (process.env.NODE_ENV === 'development') {

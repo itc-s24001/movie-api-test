@@ -12,6 +12,7 @@ import {
     doc,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import Link from "next/link";
 
 const ProfilePage = () => {
     const [groupedComments, setGroupedComments] = useState({});
@@ -105,7 +106,11 @@ const ProfilePage = () => {
                     <div key={movieId} className="mb-8 border-b border-gray-700 pb-4">
                         {group.movie ? (
                             <div className="flex items-center gap-4 mb-2">
-                                <h2 className="text-xl font-semibold">{group.movie.title}</h2>
+                                <Link href={`/movie/${movieId}`}>
+                                    <h2 className="text-xl font-semibold hover:underline cursor-pointer">
+                                        {group.movie.title}
+                                    </h2>
+                                </Link>
                                 {group.movie.poster_path && (
                                    /* <img
                                         src={`https://image.tmdb.org/t/p/w92${group.movie.poster_path}`}

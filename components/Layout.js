@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import { auth } from '../lib/firebase'
 import { signOut } from 'firebase/auth'
+import Link from "next/link";
 
 export default function Layout({ children }) {
     const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -18,7 +19,8 @@ export default function Layout({ children }) {
 
     const handleLogout = async () => {
         await signOut(auth)
-        router.push('/login')
+        setSidebarOpen(false)
+        router.push('/')
     }
 
     // 外部クリックでメニューを閉じる
@@ -40,20 +42,30 @@ export default function Layout({ children }) {
     return (
         <div className="min-h-screen bg-black text-white">
             {/* ヘッダー */}
-            <header className="flex justify-between items-center p-4 bg-gray-900 border-b border-gray-700">
+            <header className="fixed top-0 left-0 right-0 z-40 bg-gray-900 border-b border-gray-700 flex items-center justify-between p-4">
                 <button onClick={() => setSidebarOpen(true)} className="text-white text-2xl mr-4">
                     &#9776;
                 </button>
 
-                <form onSubmit={handleSearch} className="ml-auto">
-                    <input
-                        type="text"
-                        placeholder="タイトル検索 🔍"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-64 p-2 rounded bg-gray-800 text-white border border-gray-600"
-                    />
-                </form>
+                <div className="flex items-center space-x-4">
+                    {/* ロゴ画像 */}
+                    <Link href="/home">
+                        <img
+                            src="/logo.png"
+                            alt="Logo"
+                            className="h-10 w-auto object-contain"
+                        />
+                    </Link>
+                    <form onSubmit={handleSearch} className="ml-auto">
+                        <input
+                            type="text"
+                            placeholder="タイトル検索 🔍"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-64 p-2 rounded bg-gray-800 text-white border border-gray-600"
+                        />
+                    </form>
+                </div>
             </header>
 
             {/* サイドメニュー */}
@@ -72,7 +84,7 @@ export default function Layout({ children }) {
 
                 <div className="flex-1 p-6 space-y-4 overflow-y-auto mt-12">
                     <h2 className="text-xl font-bold">メニュー</h2>
-                    <button onClick={() => closeSidebarAndNavigate('/')} className="block hover:text-blue-400 text-left w-full">ホーム</button>
+                    <button onClick={() => closeSidebarAndNavigate('/home')} className="block hover:text-blue-400 text-left w-full">ホーム</button>
                     <button onClick={() => closeSidebarAndNavigate('/admin/reviews')} className="block hover:text-blue-400 text-left w-full">管理者レビュー一覧</button>
                     <button onClick={() => closeSidebarAndNavigate('/profile')} className="block hover:text-blue-400 text-left w-full">マイページ</button>
                     <button onClick={() => closeSidebarAndNavigate('/settings')} className="block hover:text-blue-400 text-left w-full">設定</button>
@@ -92,7 +104,7 @@ export default function Layout({ children }) {
                         ].map(({ name, id }) => (
                             <li key={id}>
                                 <button
-                                    onClick={() => closeSidebarAndNavigate(`/?genre=${id}&name=${name}`)}
+                                    onClick={() => closeSidebarAndNavigate(`/home/?genre=${id}&name=${name}`)}
                                     className="block hover:text-blue-400 text-left w-full"
                                 >
                                     {name}
@@ -117,7 +129,7 @@ export default function Layout({ children }) {
             </aside>
 
             {/* メイン */}
-            <main className="pt-4 px-4 md:px-6">{children}</main>
+            <main className="pt-[80px] px-4 md:px-6">{children}</main>
         </div>
     )
 }

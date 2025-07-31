@@ -98,21 +98,41 @@ export default function Home() {
     }, [])
 
     useEffect(() => {
-        const q = query(collection(db, 'reviews'), orderBy('timestamp', 'desc'))
+        const q = query(collection(db, 'reviews'), orderBy('timestamp', 'desc'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
+            const LANE_HEIGHT = 32; //レーンの高さ指定
+            const NUM_LANES = Math.floor(window.innerHeight / LANE_HEIGHT);
+            const usedLanes = new Set();
+
+            const getRandomLane = () => {
+                if (usedLanes.size >= NUM_LANES) {
+                    usedLanes.clear();
+                }
+                let lane;
+                do {
+                    lane = Math.floor(Math.random() * NUM_LANES);
+                } while (usedLanes.has(lane));
+                usedLanes.add(lane);
+                return lane;
+            };
+
             const reviews = snapshot.docs.map((doc) => {
-                const data = doc.data()
+                const data = doc.data();
+                const lane = getRandomLane();
                 return {
                     id: doc.id,
                     ...data,
-                    top: Math.random() * window.innerHeight,
+                    top: lane * LANE_HEIGHT,
                     delay: Math.random() * 5,
-                }
-            })
-            setComments(reviews)
-        })
-        return () => unsubscribe()
-    }, [])
+                };
+            });
+
+            setComments(reviews);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
 
     return (
         <div className="relative p-6 bg-black min-h-screen text-white overflow-hidden">
@@ -208,7 +228,7 @@ export default function Home() {
                             <a
                                 className="absolute whitespace-nowrap text-lg font-bold text-white pointer-events-auto hover:underline"
                                 style={{
-                                    top: `${comment.top}px`,
+                                    top: `${Math.min(comment.top, 900)}px`,
                                     transform: 'translateX(100vw)',
                                     animationDelay: `${comment.delay}s`,
                                     animationName: 'slide',
@@ -222,6 +242,7 @@ export default function Home() {
                             </a>
                         </Link>
                     ))}
+
                 </div>
             )}
 

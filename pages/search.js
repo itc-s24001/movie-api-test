@@ -41,7 +41,7 @@ export default function SearchPage() {
                                     alt="No image"
                                     className="rounded shadow-lg w-full"
                                 />
-                                <p className="mt-2">{movie.title}</p>
+                                <p className="mt-2 font-medium truncate">{movie.title}</p>
                             </div>
                         </Link>
                     ))}

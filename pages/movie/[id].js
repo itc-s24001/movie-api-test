@@ -1,4 +1,3 @@
-// pages/movies/[id].js
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { db, auth } from '../../lib/firebase'
@@ -19,7 +18,6 @@ export default function MovieDetail() {
     const [user, setUser] = useState(null)
     const [isNowPlaying, setIsNowPlaying] = useState(false)  // 現在上映中かどうか
 
-
     const providerLinks = {
         "Netflix": "https://www.netflix.com/",
         "Disney Plus": "https://www.disneyplus.com/",
@@ -30,6 +28,16 @@ export default function MovieDetail() {
         "dTV": "https://lemino.docomo.ne.jp/",
         "Rakuten TV": "https://tv.rakuten.co.jp/",
         "WOWOW": "https://www.wowow.co.jp/"
+    }
+
+    // 2ヶ月以内か判定する関数
+    const isWithinTwoMonths = (releaseDateStr) => {
+        if (!releaseDateStr) return false
+        const releaseDate = new Date(releaseDateStr)
+        const now = new Date()
+        const twoMonthsLater = new Date(releaseDate)
+        twoMonthsLater.setMonth(twoMonthsLater.getMonth() + 2)
+        return now >= releaseDate && now <= twoMonthsLater
     }
 
     useEffect(() => {
@@ -47,6 +55,7 @@ export default function MovieDetail() {
 
     useEffect(() => {
         if (!id) return
+
         const fetchMovie = async () => {
             const res = await fetch(`https://api.themoviedb.org/3/movie/${id}?language=ja-JP`, {
                 headers: {
@@ -54,22 +63,40 @@ export default function MovieDetail() {
                 }
             })
             const data = await res.json()
-            setMovie(data)
 
-            // 現在上映中の映画IDに含まれているかチェック
-            const checkNowPlaying = async () => {
-                const nowPlayingRes = await fetch(`https://api.themoviedb.org/3/movie/now_playing?language=ja-JP&region=JP`, {
-                    headers: {
-                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_ACCESS_TOKEN}`
-                    }
-                })
-                const nowPlayingData = await nowPlayingRes.json()
-                const movieIdsNowPlaying = nowPlayingData.results.map(m => m.id)
-                setIsNowPlaying(movieIdsNowPlaying.includes(data.id))
+            // 日本の公開日を取得
+            const releaseRes = await fetch(`https://api.themoviedb.org/3/movie/${id}/release_dates`, {
+                headers: {
+                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_ACCESS_TOKEN}`
+                }
+            })
+            const releaseData = await releaseRes.json()
+            const jpRelease = releaseData.results.find(r => r.iso_3166_1 === "JP")
+            const jpReleaseDate = jpRelease?.release_dates?.[0]?.release_date || null
+
+            // 公開日から2ヶ月以内なら上映中
+            let nowPlaying = false
+            let releaseNote = null
+            if (jpReleaseDate) {
+                const today = new Date()
+                const release = new Date(jpReleaseDate)
+
+                // 日数差を計算（正の値 → 公開前、負の値 → 公開後）
+                const diffDays = Math.ceil((release - today) / (1000 * 60 * 60 * 24))
+                const daysSinceRelease = Math.floor((today - release) / (1000 * 60 * 60 * 24))
+
+                if (release.toDateString() === today.toDateString()) {
+                    releaseNote = "🎉 本日、公開！"
+                    nowPlaying = true
+                } else if (release > today) {
+                    releaseNote = `🎬 公開まであと ${diffDays}日！`
+                } else if (release < today && daysSinceRelease <= 60) {
+                    // 公開後60日以内
+                    nowPlaying = true
+                }
             }
-            await checkNowPlaying()
 
-            // 配信サービスの取得
+            // 配信サービス取得
             const watchRes = await fetch(`https://api.themoviedb.org/3/movie/${id}/watch/providers`, {
                 headers: {
                     Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_ACCESS_TOKEN}`
@@ -78,13 +105,21 @@ export default function MovieDetail() {
             const watchData = await watchRes.json()
             const jpProviders = (watchData.results?.JP?.flatrate || [])
                 .filter(p => providerLinks[p.provider_name])
+
+            setMovie({ ...data, jp_release_date: jpReleaseDate, release_note: releaseNote })
+            setIsNowPlaying(nowPlaying)
             setWatchProviders(jpProviders)
         }
+
         fetchMovie()
+        fetchReviews()
     }, [id])
 
     const saveReview = async () => {
-        if (!user) return alert("ログインしてください")
+        if (!user) {
+            alert("ログインしてください")
+            return
+        }
         await addDoc(collection(db, "reviews"), {
             movieId: id,
             text: comment,
@@ -94,6 +129,14 @@ export default function MovieDetail() {
         })
     }
 
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        if (!comment.trim()) return
+        await saveReview()
+        setComment('')
+        setRating(5)
+    }
+
     const fetchReviews = async () => {
         const q = query(
             collection(db, "reviews"),
@@ -101,25 +144,10 @@ export default function MovieDetail() {
             orderBy("timestamp", "desc")
         )
         const snapshot = await getDocs(q)
-        const fetched = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }))
-        setComments(fetched)
+        const reviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        setComments(reviews)
     }
 
-    useEffect(() => {
-        if (id) fetchReviews()
-    }, [id])
-
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        if (!comment.trim()) return
-        await saveReview()
-        setComment('')
-        setRating(5)
-        fetchReviews()
-    }
 
     const handleDelete = async (reviewId) => {
         await deleteDoc(doc(db, "reviews", reviewId))
@@ -132,11 +160,11 @@ export default function MovieDetail() {
         <div className="min-h-screen bg-black text-white p-6">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-8">
                 <div className="md:w-1/3 space-y-6">
-                    {/*<img*/}
-                    {/*    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}*/}
-                    {/*    alt={movie.title}*/}
-                    {/*    className="rounded shadow-lg w-full"*/}
-                    {/*/>*/}
+                    {/*<img
+                        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                        alt={movie.title}
+                        className="rounded shadow-lg w-full"
+                    />*/}
                     <img
                         src="/noimage.png"
                         alt="No image"
@@ -179,10 +207,27 @@ export default function MovieDetail() {
                     <div>
                         <h1 className="text-3xl font-bold mb-2">{movie.title}</h1>
                         <p className="text-gray-300">{movie.overview}</p>
+                        <p>公開日: {movie.jp_release_date ? new Date(movie.jp_release_date).toLocaleDateString('ja-JP') : '不明'}</p>
+
+                        {movie.release_note && (
+                            <p className="text-green-400 text-lg font-semibold mt-2">
+                                {
+                                    // 数字（0〜9999）を見つけて大きくする
+                                    movie.release_note.split(/(\d+)/).map((part, index) => (
+                                        /^\d+$/.test(part) ? (
+                                            <span key={index} className="text-3xl font-bold">{part}</span>
+                                        ) : (
+                                            <span key={index}>{part}</span>
+                                        )
+                                    ))
+                                }
+                            </p>
+                        )}
+
 
                         {isNowPlaying && (
                             <a
-                                href={`https://eiga.com/now/q/?title=${encodeURIComponent(movie.title)}&region=&pref=&area=&genre=on&sort=release`}
+                                href={`https://eiga.com/now/q/?title=${encodeURIComponent(movie.title.replace(/／/g, " "))}&region=&pref=&area=&genre=on&sort=release`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 bg-blue-500 hover:bg-blue-400 text-white py-2 px-4 rounded mt-4"
@@ -191,7 +236,6 @@ export default function MovieDetail() {
                             </a>
                         )}
                     </div>
-
 
                     {watchProviders.length > 0 && (
                         <div>

@@ -97,7 +97,7 @@ export default function Layout({ children }) {
                 </button>
 
                 <div className="flex-1 p-6 space-y-4 overflow-y-auto mt-12">
-                    <h2 className="text-xl font-bold">メニュー</h2>
+                    <h2 className="text-2xl font-bold">メニュー</h2>
                     <button onClick={() => closeSidebarAndNavigate('/home')} className="block hover:text-blue-400 text-left w-full">ホーム</button>
 
                     {/* 管理者のみ表示 */}
@@ -112,8 +112,8 @@ export default function Layout({ children }) {
 
                     <hr className="border-gray-600" />
 
-                    <h2 className="text-xl font-bold">ジャンル</h2>
-                    <ul className="space-y-1 text-sm">
+                    <h2 className="text-2xl font-bold">ジャンル</h2>
+                    <ul className="space-y-3 text-base">
                         {[
                             { name: 'アクション', id: 28 },
                             { name: 'コメディ', id: 35 },
@@ -135,7 +135,7 @@ export default function Layout({ children }) {
                     </ul>
 
                     <hr className="border-gray-600" />
-                    <div className="text-sm text-gray-400">※ フィルターや絞り込み機能は今後追加予定</div>
+                    {/*<div className="text-sm text-gray-400">※ フィルターや絞り込み機能は今後追加予定</div>*/}
                 </div>
 
                 {/* ログアウト */}

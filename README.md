@@ -1,39 +1,31 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
 
-## Getting Started
+# 💼 プロジェクト紹介
 
-First, run the development server:
+## 🧩 WEB CINEMA (映画検索アプリ)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 🔍 概要
+映画検索で気になる映画を探せる。  
+ホーム画面で弾幕コメントでレビューが流れている。
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### チーム制作
+UIをきれいに整え、弾幕コメントを固定。  
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+### 🧠 使用技術
+- フロントエンド：Next.js  
+- バックエンド：Firebase Authentication / Firebase  
+- デプロイ：Vercel  
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+### 💪 工夫・苦労した点
+- レビューを弾幕コメントで流す
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+### ✨ 学んだこと
+- Firebaseの使い方  
+- チーム制作のコミュニケーションの重要性  
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
+### 🔗 リンク
+- GitHub: [https://github.com/itc-s24001/movie-api-test]  
+- 公開URL: [https://movie-api-test-chi.vercel.app/]
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
